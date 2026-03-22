@@ -105,10 +105,10 @@ st.image("assets/main_hero&text.png", use_container_width=True)
 st.subheader("🌙 해독할 운명의 카테고리를 선택하세요")
 
 if st.button("🪐 2026년 총운\n새로운 시대의 시작, 당신의 1년 해독"):
-    st.switch_page("pages/fortune2026.py")
+    st.switch_page("pages/01.fortune2026.py")
     
 if st.button("💼 **직업·재물운**\n나의 성공 궤적과 부의 그릇 분석"):
-    st.switch_page("pages/career.py")
+    st.switch_page("pages/02.career.py")
 
 if st.button("💖 **연애·재회운**\n숨겨진 인연과 사랑의 타이밍"):
     st.toast("현재 우주의 신호를 수신 중입니다.")
