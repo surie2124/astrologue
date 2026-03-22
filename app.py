@@ -8,7 +8,7 @@ st.set_page_config(
     page_title=f"{BRAND_KOR} ({BRAND_ENG})", 
     page_icon="🪐", 
     layout="centered",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # --- [2. UI 정밀 타격 및 다크 디자인 CSS] ---
