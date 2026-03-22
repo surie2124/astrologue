@@ -85,7 +85,15 @@ with col1:
     with t_col2: birth_min = st.number_input("분", 0, 59, 0)
 with col2:
     city_input = st.text_input("출생 도시 (City)", placeholder="Seoul")
-    st.info("한글 또는 영문으로 입력하세요.")
+    st.info("한글 또는 영문으로 입력해 주세요. (예: 서울, Seoul, New York)")
+    
+if city_input:
+        if st.button("📍 위치 확인"):
+            lat_c, lng_c, tz_c = get_global_location(city_input)
+            if lat_c:
+                st.success(f"확인됨: {city_input} (위도: {lat_c:.2f}, 경도: {lng_c:.2f})")
+            else:
+                st.error("도시를 찾을 수 없습니다. 정확한 지명인지 확인해 주세요.")
 
 st.divider()
 
