@@ -90,7 +90,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- [3. 메인 화면 구성] ---
-st.image("assets/main_hero&text.png", use_container_width=True)
+st.image("assets/main_hero_text.png", use_container_width=True)
 st.subheader("🌙 해독할 운명의 카테고리를 선택하세요")
 
 if st.button("🪐 2026년 총운\n새로운 시대의 시작, 당신의 1년 해독"):
