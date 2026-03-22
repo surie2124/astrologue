@@ -1,0 +1,5 @@
+streamlit
+kerykeion
+openai
+geopy
+timezonefinder
