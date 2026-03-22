@@ -6,70 +6,64 @@ from timezonefinder import TimezoneFinder
 import datetime
 import pandas as pd
 
-# --- [1. 서비스 브랜드 및 페이지 설정] ---
+# --- [1. 설정 및 브랜드] ---
 BRAND_KOR = "별들의 언어"
 BRAND_ENG = "AstroLogue"
 
-st.set_page_config(
-    page_title=f"2026년 총운 - {BRAND_ENG}", 
-    page_icon="🪐", 
-    layout="centered",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title=f"{BRAND_KOR}", page_icon="🪐", layout="centered", initial_sidebar_state="collapsed")
 
-# --- [2. 통합 다크 디자인 & 테이블 CSS] ---
+# --- [2. UI/CSS (리포트 스타일)] ---
 st.markdown("""
     <style>
     [data-testid="stStatusWidget"], .stDeployButton, [data-testid="stToolbar"] { visibility: hidden !important; display: none !important; }
     header { background-color: rgba(0,0,0,0) !important; }
     footer { visibility: hidden !important; }
     .stApp { background-color: #0B0E14 !important; }
-    h1, h2, h3, p, span, div, label, .stMarkdown { color: #FFFFFF !important; }
     
-    .stTable {
-        background-color: #161B22 !important;
-        border-radius: 12px !important;
-        overflow: hidden !important;
-        border: 1px solid #2C3E50 !important;
-    }
-    thead tr th { background-color: #1F2937 !important; color: #A0C4FF !important; text-align: center !important; }
-    tbody tr td { color: #E0E0E0 !important; border-bottom: 1px solid #2C3E50 !important; text-align: center !important; }
-
-    button[data-testid="stSidebarCollapsedControl"] {
-        visibility: visible !important;
-        color: white !important;
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border-radius: 8px !important;
+    /* 대시보드형 메트릭 디자인 */
+    [data-testid="stMetricValue"] { font-size: 24px !important; color: #A0C4FF !important; }
+    [data-testid="stMetricLabel"] { font-size: 14px !important; color: #FFFFFF !important; opacity: 0.8; }
+    
+    /* 리포트 섹션 디자인 */
+    .report-card {
+        background-color: #161B22;
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid #30363D;
+        margin-bottom: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- [3. 데이터 매핑 설정 (약어 대응 추가)] ---
+# --- [3. 헬퍼 로직] ---
 MY_OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 geolocator = Nominatim(user_agent="astrologue_global_app")
 tf = TimezoneFinder()
 
-# 약어와 풀네임을 모두 지원하도록 보강
 SIGN_MAP = {
-    "Aries": "양자리", "Ari": "양자리", "Taurus": "황소자리", "Tau": "황소자리",
-    "Gemini": "쌍둥이자리", "Gem": "쌍둥이자리", "Cancer": "게자리", "Can": "게자리",
-    "Leo": "사자자리", "Virgo": "처녀자리", "Vir": "처녀자리", "Libra": "천칭자리", "Lib": "천칭자리",
-    "Scorpio": "전갈자리", "Sco": "전갈자리", "Sagittarius": "사수자리", "Sag": "사수자리",
-    "Capricorn": "염소자리", "Cap": "염소자리", "Aquarius": "물병자리", "Aqu": "물병자리", "Pisces": "물고기자리", "Pis": "물고기자리"
+    "Aries": "양자리", "Ari": "양자리", "Taurus": "황소자리", "Tau": "황소자리", "Gemini": "쌍둥이자리", "Gem": "쌍둥이자리",
+    "Cancer": "게자리", "Can": "게자리", "Leo": "사자자리", "Virgo": "처녀자리", "Vir": "처녀자리", "Libra": "천칭자리", "Lib": "천칭자리",
+    "Scorpio": "전갈자리", "Sco": "전갈자리", "Sagittarius": "사수자리", "Sag": "사수자리", "Capricorn": "염소자리", "Cap": "염소자리",
+    "Aquarius": "물병자리", "Aqu": "물병자리", "Pisces": "물고기자리", "Pis": "물고기자리"
 }
-PLANET_MAP = {
-    "Sun": "태양", "Moon": "달", "Mercury": "수성", "Venus": "금성", "Mars": "화성",
-    "Jupiter": "목성", "Saturn": "토성", "Uranus": "천왕성", "Neptune": "해왕성", "Pluto": "명왕성"
-}
-HOUSE_ATTRS = ["first_house", "second_house", "third_house", "fourth_house", "fifth_house", "sixth_house", 
-               "seventh_house", "eighth_house", "ninth_house", "tenth_house", "eleventh_house", "twelfth_house"]
+PLANET_MAP = { "Sun": "태양", "Moon": "달", "Mercury": "수성", "Venus": "금성", "Mars": "화성", "Jupiter": "목성", "Saturn": "토성", "Uranus": "천왕성", "Neptune": "해왕성", "Pluto": "명왕성" }
 
-def get_global_location(city_name):
+def clean_house(house_str):
+    """'Fifth_House' 등을 '5'로 변환"""
+    import re
+    nums = {"First": "1", "Second": "2", "Third": "3", "Fourth": "4", "Fifth": "5", "Sixth": "6", 
+            "Seventh": "7", "Eighth": "8", "Ninth": "9", "Tenth": "10", "Eleventh": "11", "Twelfth": "12"}
+    for k, v in nums.items():
+        if k in str(house_str): return v
+    return str(house_str)
+
+def get_location(city):
     try:
-        location = geolocator.geocode(city_name)
-        if location: return location.latitude, location.longitude, tf.timezone_at(lng=location.longitude, lat=location.latitude)
+        loc = geolocator.geocode(city)
+        if loc: return loc.latitude, loc.longitude, tf.timezone_at(lng=loc.longitude, lat=loc.latitude)
         return None, None, None
     except: return None, None, None
+
 
 # --- [4. UI 레이아웃] ---
 st.title("🪐 2026년 총운 해독")
@@ -86,7 +80,7 @@ with col1:
 with col2:
     city_input = st.text_input("출생 도시 (City)", placeholder="Seoul")
     st.info("한글 또는 영문으로 입력해 주세요. (예: 서울, Seoul, New York)")
-    
+
 if city_input:
         if st.button("📍 위치 확인"):
             lat_c, lng_c, tz_c = get_global_location(city_input)
@@ -97,59 +91,72 @@ if city_input:
 
 st.divider()
 
-# --- [5. 메인 분석 로직 (오류 유발 요소 제거)] ---
-if st.button("✨ 2026년 대운 해독하기"):
+# --- [5. 실행 로직] ---
+if st.button("📊 데이터 분석 리포트 생성하기"):
     if not city_input or not user_name:
-        st.warning("정보를 모두 입력해 주세요.")
+        st.warning("정보를 입력해 주세요.")
     else:
-        with st.spinner("🔮 우주의 데이터를 시뮬레이션하고 있습니다..."):
-            lat, lng, tz_str = get_global_location(city_input)
+        with st.spinner("⏳ 천체 위치 데이터를 동기화하고 알고리즘을 계산 중..."):
+            lat, lng, tz = get_location(city_input)
             try:
                 user = AstrologicalSubjectFactory.from_birth_data(
                     user_name, birth_date.year, birth_date.month, birth_date.day,
-                    int(birth_hour), int(birth_min), lng=lng, lat=lat, tz_str=tz_str, online=False
+                    int(birth_hour), int(birth_min), lng=lng, lat=lat, tz_str=tz, online=False
                 )
 
-                # 1. 시각화: 행성 데이터 (깔끔한 한글 변환)
-                st.markdown("### ⭐ 나의 출생 차트 데이터")
-                p_list = []
-                for p in [user.sun, user.moon, user.mercury, user.venus, user.mars, user.jupiter, user.saturn, user.uranus, user.neptune, user.pluto]:
-                    p_list.append({
-                        "행성": PLANET_MAP.get(p.name, p.name),
-                        "별자리": SIGN_MAP.get(p.sign, p.sign) + (" (역행)" if p.retrograde else ""),
-                        "도수": f"{p.position:.1f}°",
-                        "하우스": f"{p.house}H" # house_name 대신 숫자로 표시
-                    })
-                p_list.append({"행성": "상승궁(ASC)", "별자리": SIGN_MAP.get(user.first_house.sign, user.first_house.sign), "도수": f"{user.first_house.position:.1f}°", "하우스": "1H"})
-                st.table(pd.DataFrame(p_list))
+                # [A. 대시보드형 데이터 요약]
+                st.markdown("### 🧬 핵심 정체성 데이터")
+                m1, m2, m3 = st.columns(3)
+                m1.metric("태양 (의지)", SIGN_MAP.get(user.sun.sign, user.sun.sign))
+                m2.metric("달 (정서)", SIGN_MAP.get(user.moon.sign, user.moon.sign))
+                m3.metric("상승궁 (사회적 자아)", SIGN_MAP.get(user.first_house.sign, user.first_house.sign))
 
-                # 2. 하우스 정보 (아스펙트 제거하여 안전성 확보)
-                with st.expander("🏠 12 하우스 상세 정보"):
-                    h_list = []
-                    for i, attr in enumerate(HOUSE_ATTRS, 1):
-                        house_obj = getattr(user, attr)
-                        h_list.append({"하우스": f"{i}H", "영역": f"{i}번 방", "별자리": SIGN_MAP.get(house_obj.sign, house_obj.sign)})
-                    st.table(pd.DataFrame(h_list))
+                with st.expander("📝 전체 천체 배치 상세 표 확인"):
+                    p_list = []
+                    for p in [user.sun, user.moon, user.mercury, user.venus, user.mars, user.jupiter, user.saturn]:
+                        p_list.append({
+                            "천체": PLANET_MAP.get(p.name, p.name),
+                            "별자리": SIGN_MAP.get(p.sign, p.sign) + (" (역행)" if p.retrograde else ""),
+                            "하우스": clean_house(p.house) + "H"
+                        })
+                    st.table(pd.DataFrame(p_list))
 
                 st.divider()
 
-                # 3. AI 분석 실행 (요청하신 6가지 항목)
-                chart_summary = f"Sun:{user.sun.sign}, Moon:{user.moon.sign}, Asc:{user.first_house.sign}, Saturn:{user.saturn.sign}"
+                # [B. 전략적 AI 분석]
+                chart_info = f"Sun:{user.sun.sign} in {user.sun.house}, Moon:{user.moon.sign} in {user.moon.house}, Asc:{user.first_house.sign}"
+                
                 client = OpenAI(api_key=MY_OPENAI_API_KEY)
                 
-                fortune_prompt = f"""
-                아래 사용자의 네이탈 데이터 {chart_summary}를 기반으로 2026년 운세를 분석해.
-                1.기질분석 2.12개월 키워드표 3.커리어 4.연애 5.금전 6.조언 순서로 반말로 격조있게 써줘.
+                # 분석 톤을 정수님의 배경(OM/전략/데이터)에 맞게 튜닝
+                prompt = f"""
+                당신은 점성술 데이터를 기반으로 개인의 연간 비즈니스/라이프 전략을 수립하는 'Strategic Astrologer'야. 
+                사용자({user_name})의 차트({chart_info})를 분석하여 2026년 전략 리포트를 작성해.
+
+                분석 가이드라인:
+                1. '반말'로 작성하되, 전문적인 컨설턴트처럼 지적인 문체를 사용해.
+                2. 서론이나 "물론이야" 같은 인사말은 완전히 생략하고 바로 본론(1번 항목)부터 시작해.
+                3. '2. 12개월 궤적' 섹션은 반드시 아래 Markdown Table 포맷을 정확히 지켜서 작성해.
+                   | 월 | 핵심 테마 | 전략적 집중도(1-5) |
+                   |---|---|---|
+
+                포함 항목:
+                ### 1. [핵심 기질 및 성향 분석] : 사용자의 의사결정 방식과 운영 효율성 측면에서의 강점/약점 분석.
+                ### 2. [2026년 12개월 궤적] : 연간 흐름을 데이터 테이블로 정리.
+                ### 3. [커리어 변곡점 및 성과 관리] : 직업적 기회 비용과 최적의 액션 타이밍.
+                ### 4. [관계의 역학 및 네트워킹] : 대인관계에서의 리스크 관리와 협력 패턴.
+                ### 5. [재무적 파이프라인 및 자산 관리] : 투자 성향에 따른 2026년 재물운 흐름.
+                ### 6. [전략적 요약 한 줄] : 2026년을 관통하는 하나의 마스터 플랜 문장.
                 """
 
                 response = client.chat.completions.create(
                     model="gpt-4o",
-                    messages=[{"role": "system", "content": "너는 AstroLogue 점성술 알고리즘이야."}, {"role": "user", "content": fortune_prompt}],
-                    temperature=0.7, max_tokens=3500
+                    messages=[{"role": "system", "content": "너는 구조적 데이터 분석과 점성술을 결합한 전문 컨설턴트 및 전략가야."},
+                              {"role": "user", "content": prompt}],
+                    temperature=0.8
                 )
 
-                st.success(f"✅ {user_name}님의 운명이 해독되었습니다.")
                 st.markdown(response.choices[0].message.content)
 
             except Exception as e:
-                st.error(f"해독 중 오류 발생: {e}. 라이브러리 호환성 문제입니다.")
+                st.error(f"분석 중 기술적 오류 발생: {e}")
