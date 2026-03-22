@@ -10,7 +10,7 @@ BRAND_KOR = "별들의 언어"
 BRAND_ENG = "AstroLogue"
 
 # 개발자용 API 키 (실제 배포 시에는 환경변수나 st.secrets 사용 권장)
-MY_OPENAI_API_KEY = "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"
+MY_OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
 # 도구 초기화
 geolocator = Nominatim(user_agent="astrologue_global_app")

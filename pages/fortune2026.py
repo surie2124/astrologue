@@ -8,7 +8,7 @@ import datetime
 # --- [1. 브랜드 및 보안 설정] ---
 BRAND_KOR = "별들의 언어"
 BRAND_ENG = "AstroLogue"
-MY_OPENAI_API_KEY = "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" # 본인의 키 유지
+MY_OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
 # --- [2. 헬퍼 함수] ---
 geolocator = Nominatim(user_agent="astrologue_global_app")
@@ -53,12 +53,17 @@ with col1:
         with t_col2: birth_min = st.number_input("분", 0, 59, 0)
 
 with col2:
-    city_input = st.text_input("출생 도시", placeholder="Seoul")
+    city_input = st.text_input("출생 도시 (City)", placeholder="Seoul")
+    st.info("정확한 도시명을 영문으로 입력해 주세요. (예: New York, London, Paris)")
+    
     if city_input:
         if st.button("📍 위치 확인"):
-            lat_c, lng_c, tz_c = get_global_location(city_input)
-            if lat_c: st.success(f"확인됨: {city_input}")
-            else: st.error("도시를 찾을 수 없습니다.")
+            lat_check, lng_check, tz_check = get_global_location(city_input)
+            if lat_check:
+                st.success(f"확인됨: {city_input} (시간대: {tz_check})")
+            else:
+                st.error("도시를 찾을 수 없습니다. 영문 철자를 확인해 주세요.")
+
 
 st.divider()
 
