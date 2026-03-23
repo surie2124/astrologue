@@ -49,7 +49,7 @@ st.markdown("""
         transition: all 0.3s ease !important;
     }
     .stButton>button:hover {
-        background: #2563EB !important;
+        background: #FFFFFF !important;
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
     }
 
