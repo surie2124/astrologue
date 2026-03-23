@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!--
+  templates/report.html
+  결제 완료 후 AI 운세 리포트 출력 페이지
+  Markdown 렌더링은 marked.js 라이브러리를 사용
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ user_name }}님의 2026년 운세 리포트 — AstroLogue</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #0B0E14;
+      color: #FFFFFF;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      padding: 40px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .report-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .report-header h1 { font-size: 1.6rem; color: #A0C4FF; }
+    .report-header p  { font-size: 0.9rem; color: #8B9DB0; margin-top: 8px; }
+
+    /* 리포트 본문 카드 */
+    .report-card {
+      background-color: #161B22;
+      border: 1px solid #30363D;
+      border-radius: 20px;
+      padding: 36px;
+      width: 100%;
+      max-width: 720px;
+      line-height: 1.8;
+    }
+
+    /* Markdown 렌더링 스타일 */
+    .report-card h3 {
+      color: #A0C4FF;
+      font-size: 1.1rem;
+      margin: 24px 0 12px;
+      border-bottom: 1px solid #30363D;
+      padding-bottom: 6px;
+    }
+    .report-card p  { margin-bottom: 12px; color: #D1D5DB; }
+    .report-card table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    .report-card th {
+      background: #0D1117;
+      color: #A0C4FF;
+      padding: 10px 12px;
+      border: 1px solid #30363D;
+    }
+    .report-card td {
+      padding: 9px 12px;
+      border: 1px solid #30363D;
+      color: #D1D5DB;
+    }
+    .report-card tr:nth-child(even) td { background: #0F1419; }
+
+    /* 처음으로 버튼 */
+    .btn-home {
+      display: block;
+      margin: 28px auto 0;
+      padding: 14px 32px;
+      background: transparent;
+      border: 1px solid #A0C4FF;
+      border-radius: 12px;
+      color: #A0C4FF;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: background 0.2s;
+      max-width: 240px;
+    }
+    .btn-home:hover { background: rgba(160, 196, 255, 0.1); }
+
+    footer {
+      margin-top: 40px;
+      color: #4A5568;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="report-header">
+    <h1>🪐 {{ user_name }}님의 2026년 운명</h1>
+    <p>별들의 언어 (AstroLogue) — 결제 완료</p>
+  </div>
+
+  <!-- 리포트 본문 — marked.js가 Markdown을 HTML로 변환하여 삽입 -->
+  <div class="report-card" id="report-body"></div>
+
+  <a href="/" class="btn-home">← 처음으로 돌아가기</a>
+
+  <footer>© 2026 AstroLogue Project. All rights reserved.</footer>
+
+  <!-- marked.js: Markdown → HTML 변환 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    // Jinja2로 전달된 Markdown 리포트 문자열을 HTML로 변환하여 삽입
+    // |tojson 필터로 JS 문자열 이스케이프 처리
+    const reportMarkdown = {{ report | tojson }};
+    document.getElementById("report-body").innerHTML = marked.parse(reportMarkdown);
+  </script>
+</body>
+</html>

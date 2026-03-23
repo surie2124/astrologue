@@ -15,22 +15,50 @@ st.set_page_config(page_title=f"{BRAND_KOR}", page_icon="🪐", layout="centered
 # --- [2. UI/CSS (리포트 스타일)] ---
 st.markdown("""
     <style>
+    /* 1. 상단 툴바 및 불필요한 요소 제거 (깔끔함 유지) */
     [data-testid="stStatusWidget"], .stDeployButton, [data-testid="stToolbar"] { visibility: hidden !important; display: none !important; }
     header { background-color: rgba(0,0,0,0) !important; }
     footer { visibility: hidden !important; }
-    .stApp { background-color: #0B0E14 !important; }
-    
-    /* 대시보드형 메트릭 디자인 */
-    [data-testid="stMetricValue"] { font-size: 24px !important; color: #A0C4FF !important; }
-    [data-testid="stMetricLabel"] { font-size: 14px !important; color: #FFFFFF !important; opacity: 0.8; }
-    
-    /* 리포트 섹션 디자인 */
-    .report-card {
-        background-color: #161B22;
-        padding: 20px;
-        border-radius: 15px;
-        border: 1px solid #30363D;
-        margin-bottom: 20px;
+
+    /* 2. 전체 배경 화이트 및 텍스트 검정색 (가독성 최우선) */
+    .stApp {
+        background-color: #FFFFFF !important;
+    }
+    h1, h2, h3, p, span, div, label, .stMarkdown {
+        color: #1A1A1A !important; /* 진한 회색/검정 */
+    }
+
+    /* 3. 대시보드 메트릭 디자인 */
+    [data-testid="stMetricValue"] {
+        color: #1E3A8A !important; /* 세련된 네이비 블루 */
+        font-weight: 800 !important;
+    }
+    [data-testid="stMetricLabel"] {
+        color: #4B5563 !important;
+    }
+
+    /* 4. 버튼 디자인 (화이트 배경에 어울리는 블루 포인트) */
+    .stButton>button {
+        width: 100% !important;
+        background: #1E3A8A !important;
+        color: #FFFFFF !important;
+        border-radius: 12px !important;
+        border: none !important;
+        padding: 10px !important;
+        font-weight: 700 !important;
+        transition: all 0.3s ease !important;
+    }
+    .stButton>button:hover {
+        background: #2563EB !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    /* 5. 사이드바 디자인 */
+    [data-testid="stSidebar"] {
+        background-color: #F3F4F6 !important; /* 밝은 회색 */
+    }
+    [data-testid="stSidebar"] * {
+        color: #1A1A1A !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -92,11 +120,11 @@ if city_input:
 st.divider()
 
 # --- [5. 실행 로직] ---
-if st.button("📊 데이터 분석 리포트 생성하기"):
+if st.button("✨ 2026년 대운 해독하기"):
     if not city_input or not user_name:
         st.warning("정보를 입력해 주세요.")
     else:
-        with st.spinner("⏳ 천체 위치 데이터를 동기화하고 알고리즘을 계산 중..."):
+        with st.spinner("🔮 우주의 데이터를 수집하여 차트를 해독하고 있습니다..."):
             lat, lng, tz = get_location(city_input)
             try:
                 user = AstrologicalSubjectFactory.from_birth_data(

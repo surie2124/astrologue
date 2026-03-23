@@ -1,0 +1,10 @@
+# Flask 전환 버전 의존성
+# 기존 requirements.txt(Streamlit 버전)와 별개로 관리
+
+flask
+python-dotenv
+kerykeion
+openai
+geopy
+timezonefinder
+requests

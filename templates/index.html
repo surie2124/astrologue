@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<!--
+  templates/index.html
+  AstroLogue Flask 버전 메인 입력 페이지 — 기본 뼈대
+  디자인은 기존 Streamlit 버전의 다크 테마(#0B0E14 배경)를 기준으로 구성
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>별들의 언어 (AstroLogue)</title>
+
+  <!-- ── 기본 스타일 ── -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #0B0E14;
+      color: #FFFFFF;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    /* ── 헤더 영역 ── */
+    .brand-title {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .brand-subtitle {
+      font-size: 0.95rem;
+      color: #A0C4FF;
+      margin-bottom: 40px;
+    }
+
+    /* ── 오류 메시지 배너 ── */
+    .error-banner {
+      background: #2D1B1B;
+      border: 1px solid #ff6b6b;
+      color: #ff9e9e;
+      padding: 12px 20px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    /* ── 입력 폼 카드 ── */
+    .form-card {
+      background-color: #161B22;
+      border: 1px solid #30363D;
+      border-radius: 20px;
+      padding: 36px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .form-card h2 {
+      font-size: 1.2rem;
+      color: #A0C4FF;
+      margin-bottom: 24px;
+    }
+
+    /* ── 폼 요소 ── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: #8B9DB0;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"] {
+      background-color: #0D1117;
+      border: 1px solid #30363D;
+      border-radius: 10px;
+      color: #FFFFFF;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #A0C4FF;
+    }
+
+    /* 시/분 나란히 배치 */
+    .time-row {
+      display: flex;
+      gap: 12px;
+    }
+    .time-row .form-group { flex: 1; }
+
+    /* ── 버튼 공통 ── */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid #2C3E50;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 8px;
+    }
+
+    /* 위치 확인 버튼 */
+    .btn-secondary {
+      background: transparent;
+      color: #A0C4FF;
+      border-color: #A0C4FF;
+    }
+    .btn-secondary:hover {
+      background: rgba(160, 196, 255, 0.1);
+    }
+
+    /* 메인 CTA 버튼 */
+    .btn-primary {
+      background: linear-gradient(145deg, #161B22, #0D1117);
+      color: #FFFFFF;
+      border-color: #2C3E50;
+      font-size: 1.1rem;
+      min-height: 64px;
+      margin-top: 20px;
+    }
+    .btn-primary:hover {
+      border-color: #A0C4FF;
+      box-shadow: 0 8px 24px rgba(160, 196, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* ── 미리보기 카드 (차트 결과) ── */
+    #preview-section {
+      display: none;  /* 초기 숨김 — JS로 표시 */
+      margin-top: 24px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .metric-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      flex: 1;
+      background: #0D1117;
+      border: 1px solid #30363D;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: #8B9DB0;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #A0C4FF;
+    }
+
+    /* ── 로딩 스피너 ── */
+    .spinner {
+      display: none;
+      text-align: center;
+      color: #A0C4FF;
+      margin: 12px 0;
+      font-size: 0.9rem;
+    }
+
+    /* ── 푸터 ── */
+    footer {
+      margin-top: auto;
+      padding-top: 40px;
+      color: #4A5568;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── 브랜드 헤더 ── -->
+  <div class="brand-title">🪐 별들의 언어</div>
+  <div class="brand-subtitle">당신이 태어난 순간, 별들이 속삭인 운명의 언어를 해독합니다.</div>
+
+  <!-- ── 오류 메시지 (서버에서 전달 시 표시) ── -->
+  {% if error %}
+  <div class="error-banner">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <!-- ── 입력 폼 카드 ── -->
+  <div class="form-card">
+    <h2>🌙 2026년 총운 해독</h2>
+
+    <div class="form-group">
+      <label for="name">성함 (Name)</label>
+      <input type="text" id="name" placeholder="홍길동" />
+    </div>
+
+    <div class="form-group">
+      <label for="birth-date">출생 날짜</label>
+      <input type="date" id="birth-date" value="1996-01-01" />
+    </div>
+
+    <div class="time-row">
+      <div class="form-group">
+        <label for="birth-hour">시 (Hour)</label>
+        <input type="number" id="birth-hour" min="0" max="23" value="22" />
+      </div>
+      <div class="form-group">
+        <label for="birth-min">분 (Minute)</label>
+        <input type="number" id="birth-min" min="0" max="59" value="0" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="city">출생 도시 (City)</label>
+      <input type="text" id="city" placeholder="Seoul (한글 또는 영문)" />
+    </div>
+
+    <!-- 위치 확인 버튼 -->
+    <button class="btn btn-secondary" onclick="checkLocation()">📍 위치 확인</button>
+    <div id="location-msg" style="margin-top:8px; font-size:0.85rem; color:#A0C4FF;"></div>
+
+    <!-- 차트 계산 버튼 -->
+    <button class="btn btn-primary" onclick="runChart()">✨ 2026년 대운 해독하기</button>
+    <div class="spinner" id="spinner-chart">🔮 차트를 계산하고 있습니다...</div>
+  </div>
+
+  <!-- ── 차트 미리보기 영역 (API 응답 후 표시) ── -->
+  <div id="preview-section">
+    <div class="metric-row">
+      <div class="metric-card">
+        <div class="metric-label">태양 (의지)</div>
+        <div class="metric-value" id="val-sun">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">달 (정서)</div>
+        <div class="metric-value" id="val-moon">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">상승궁 (사회적 자아)</div>
+        <div class="metric-value" id="val-asc">—</div>
+      </div>
+    </div>
+
+    <!-- 결제 버튼 (토스페이먼츠 JS SDK가 처리) -->
+    <button class="btn btn-primary" onclick="requestPayment()">
+      💳 ₩3,900 결제하고 전체 리포트 받기
+    </button>
+    <div class="spinner" id="spinner-pay">💫 결제창을 불러오고 있습니다...</div>
+  </div>
+
+
+  <!-- ── 토스페이먼츠 JS SDK ── -->
+  <!--
+    실제 사용 시 아래 src를 토스페이먼츠 공식 CDN URL로 교체할 것.
+    테스트 키 사용 시에도 동일한 SDK URL을 사용한다.
+    공식 문서: https://docs.tosspayments.com
+  -->
+  <script src="https://js.tosspayments.com/v1/payment"></script>
+
+  <script>
+    // 서버에서 Jinja2로 주입된 토스페이먼츠 클라이언트 키
+    const TOSS_CLIENT_KEY = "{{ toss_client_key }}";
+
+    // 차트 계산 결과를 전역으로 보관 (결제 요청 시 재사용)
+    let chartResult = null;
+
+    /* ── 위치 확인 ── */
+    async function checkLocation() {
+      const city = document.getElementById("city").value.trim();
+      const msg  = document.getElementById("location-msg");
+      if (!city) { msg.textContent = "도시명을 입력해 주세요."; return; }
+
+      msg.textContent = "위치를 확인하는 중...";
+      const res  = await fetch("/api/chart", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        // 위치 확인만 하는 용도이므로 최소 데이터 전송
+        body: JSON.stringify({
+          name: "check", year: 1990, month: 1, day: 1,
+          hour: 12, minute: 0, city: city
+        }),
+      });
+      const data = await res.json();
+      if (data.error && data.error.includes("도시를 찾을 수 없습니다")) {
+        msg.style.color = "#ff9e9e";
+        msg.textContent = "❌ 도시를 찾을 수 없습니다. 정확한 지명인지 확인해 주세요.";
+      } else {
+        msg.style.color = "#A0C4FF";
+        msg.textContent = `✅ ${city} 위치 확인 완료`;
+      }
+    }
+
+    /* ── 차트 계산 ── */
+    async function runChart() {
+      const name  = document.getElementById("name").value.trim();
+      const city  = document.getElementById("city").value.trim();
+      const dateVal = document.getElementById("birth-date").value;   // "YYYY-MM-DD"
+      const hour  = parseInt(document.getElementById("birth-hour").value);
+      const min   = parseInt(document.getElementById("birth-min").value);
+
+      if (!name || !city || !dateVal) {
+        alert("성함, 출생 날짜, 출생 도시를 모두 입력해 주세요.");
+        return;
+      }
+
+      const [year, month, day] = dateVal.split("-").map(Number);
+
+      // 스피너 표시
+      document.getElementById("spinner-chart").style.display = "block";
+      document.getElementById("preview-section").style.display = "none";
+
+      const res  = await fetch("/api/chart", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, year, month, day, hour, minute: min, city }),
+      });
+      const data = await res.json();
+
+      document.getElementById("spinner-chart").style.display = "none";
+
+      if (data.error) {
+        alert("오류: " + data.error);
+        return;
+      }
+
+      // 미리보기 카드 업데이트 및 표시
+      chartResult = data;
+      document.getElementById("val-sun").textContent  = data.sun;
+      document.getElementById("val-moon").textContent = data.moon;
+      document.getElementById("val-asc").textContent  = data.ascendant;
+      document.getElementById("preview-section").style.display = "block";
+    }
+
+    /* ── 토스페이먼츠 결제 요청 ── */
+    async function requestPayment() {
+      if (!chartResult) { alert("차트를 먼저 계산해 주세요."); return; }
+
+      document.getElementById("spinner-pay").style.display = "block";
+
+      // 주문 ID 생성 (클라이언트 측 — 고유값 보장)
+      const orderId   = "order_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
+      const orderName = "AstroLogue 2026 총운 리포트";
+
+      // 서버에 주문 정보 저장
+      await fetch("/pay/request", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: orderId, order_name: orderName }),
+      });
+
+      // 토스페이먼츠 결제창 호출
+      const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+      tossPayments.requestPayment("카드", {
+        amount:      3900,
+        orderId:     orderId,
+        orderName:   orderName,
+        customerName: document.getElementById("name").value.trim(),
+        successUrl:  window.location.origin + "/pay/success",
+        failUrl:     window.location.origin + "/pay/fail",
+      }).catch(function(error) {
+        document.getElementById("spinner-pay").style.display = "none";
+        if (error.code !== "USER_CANCEL") {
+          alert("결제 오류: " + error.message);
+        }
+      });
+    }
+  </script>
+
+  <footer>© 2026 AstroLogue Project. All rights reserved.</footer>
+
+</body>
+</html>
