@@ -12,54 +12,52 @@ BRAND_ENG = "AstroLogue"
 
 st.set_page_config(page_title=f"{BRAND_KOR}", page_icon="🪐", layout="centered", initial_sidebar_state="collapsed")
 
-# --- [2. UI/CSS (리포트 스타일)] ---
+# --- [2. 화이트 테마 및 버튼 커스텀 CSS] ---
 st.markdown("""
     <style>
-    /* 1. 상단 툴바 및 불필요한 요소 제거 (깔끔함 유지) */
+    /* 상단 및 불필요 요소 제거 */
     [data-testid="stStatusWidget"], .stDeployButton, [data-testid="stToolbar"] { visibility: hidden !important; display: none !important; }
     header { background-color: rgba(0,0,0,0) !important; }
     footer { visibility: hidden !important; }
 
-    /* 2. 전체 배경 화이트 및 텍스트 검정색 (가독성 최우선) */
-    .stApp {
-        background-color: #FFFFFF !important;
-    }
-    h1, h2, h3, p, span, div, label, .stMarkdown {
-        color: #1A1A1A !important; /* 진한 회색/검정 */
-    }
+    /* 배경 및 기본 텍스트 */
+    .stApp { background-color: #FFFFFF !important; }
+    h1, h2, h3, p, span, div, label, .stMarkdown { color: #1A1A1A !important; }
 
-    /* 3. 대시보드 메트릭 디자인 */
-    [data-testid="stMetricValue"] {
-        color: #FFFFFF !important; /* 세련된 네이비 블루 */
-        font-weight: 800 !important;
-    }
-    [data-testid="stMetricLabel"] {
-        color: #4B5563 !important;
-    }
-
-    /* 4. 버튼 디자인 (화이트 배경에 어울리는 블루 포인트) */
+    /* -------------------------------------------
+       [버튼 디자인 커스텀]
+    ------------------------------------------- */
     .stButton>button {
         width: 100% !important;
-        background: #FFFFFF !important;
-        color: #FFFFFF !important;
-        border-radius: 12px !important;
-        border: none !important;
-        padding: 10px !important;
+        /* 기본 상태: 회색 계열 */
+        background-color: #F3F4F6 !important; 
+        /* 텍스트: 검정 */
+        color: #1A1A1A !important; 
+        /* 라운드 테두리 */
+        border-radius: 25px !important; 
+        border: 1px solid #D1D5DB !important;
+        padding: 12px 0px !important;
         font-weight: 700 !important;
+        font-size: 16px !important;
         transition: all 0.3s ease !important;
-    }
-    .stButton>button:hover {
-        background: #2563EB !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
 
-    /* 5. 사이드바 디자인 */
-    [data-testid="stSidebar"] {
-        background-color: #F3F4F6 !important; /* 밝은 회색 */
+    /* 호버 상태: 푸른 계열 + 검정 텍스트 유지 */
+    .stButton>button:hover {
+        background-color: #BFDBFE !important; /* 연한 블루 (검정 글씨 가독성 확보) */
+        color: #000000 !important; 
+        border-color: #3B82F6 !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
+        transform: translateY(-1px) !important;
     }
-    [data-testid="stSidebar"] * {
-        color: #1A1A1A !important;
-    }
+
+    /* 대시보드 메트릭 */
+    [data-testid="stMetricValue"] { color: #1E3A8A !important; font-weight: 800 !important; }
+    [data-testid="stMetricLabel"] { color: #4B5563 !important; }
+
+    /* 사이드바 */
+    [data-testid="stSidebar"] { background-color: #F9FAFB !important; }
     </style>
     """, unsafe_allow_html=True)
 
