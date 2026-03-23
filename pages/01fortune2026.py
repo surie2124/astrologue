@@ -30,7 +30,7 @@ st.markdown("""
 
     /* 3. 대시보드 메트릭 디자인 */
     [data-testid="stMetricValue"] {
-        color: #1E3A8A !important; /* 세련된 네이비 블루 */
+        color: #FFFFFF !important; /* 세련된 네이비 블루 */
         font-weight: 800 !important;
     }
     [data-testid="stMetricLabel"] {
@@ -40,7 +40,7 @@ st.markdown("""
     /* 4. 버튼 디자인 (화이트 배경에 어울리는 블루 포인트) */
     .stButton>button {
         width: 100% !important;
-        background: #1E3A8A !important;
+        background: #FFFFFF !important;
         color: #FFFFFF !important;
         border-radius: 12px !important;
         border: none !important;
@@ -49,7 +49,7 @@ st.markdown("""
         transition: all 0.3s ease !important;
     }
     .stButton>button:hover {
-        background: #FFFFFF !important;
+        background: #2563EB !important;
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
     }
 
