@@ -34,9 +34,9 @@ st.markdown("""
         /* 텍스트: 검정 */
         color: #1A1A1A !important; 
         /* 라운드 테두리 */
-        border-radius: 25px !important; 
+        border-radius: 12px !important; 
         border: 1px solid #D1D5DB !important;
-        padding: 12px 0px !important;
+        padding: 10px !important;
         font-weight: 700 !important;
         font-size: 16px !important;
         transition: all 0.3s ease !important;
